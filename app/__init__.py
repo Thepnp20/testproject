@@ -1,0 +1,1 @@
+# FastAPI Celery MongoDB Demo Application 

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": [
+    {
+      "name": "app",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "Dockerfile"
+      },
+      "deploy": {
+        "numReplicas": 1,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 300,
+        "startCommand": "python run.py"
+      }
+    },
+    {
+      "name": "celery-worker",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "celery-worker.Dockerfile"
+      },
+      "deploy": {
+        "numReplicas": 1,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "startCommand": "celery -A celery_worker.celery_app worker --loglevel=info"
+      }
+    },
+    {
+      "name": "celery-flower",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "celery-flower.Dockerfile"
+      },
+      "deploy": {
+        "numReplicas": 1,
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "startCommand": "celery -A celery_worker.celery_app flower --port=5555"
+      }
+    }
+  ],
+  "environments": {
+    "production": {
+      "variables": {
+        "MONGODB_URL": "mongodb://mongodb:27017",
+        "DATABASE_NAME": "fastapi_celery_demo",
+        "REDIS_URL": "redis://redis:6379/0",
+        "CELERY_BROKER_URL": "redis://redis:6379/0",
+        "CELERY_RESULT_BACKEND": "redis://redis:6379/0",
+        "APP_HOST": "0.0.0.0",
+        "APP_PORT": "8000",
+        "DEBUG": "false"
+      }
+    },
+    "development": {
+      "variables": {
+        "MONGODB_URL": "mongodb://mongodb:27017",
+        "DATABASE_NAME": "fastapi_celery_demo_dev",
+        "REDIS_URL": "redis://redis:6379/0",
+        "CELERY_BROKER_URL": "redis://redis:6379/0",
+        "CELERY_RESULT_BACKEND": "redis://redis:6379/0",
+        "APP_HOST": "0.0.0.0",
+        "APP_PORT": "8000",
+        "DEBUG": "true"
+      }
+    }
+  }
+} 

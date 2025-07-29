@@ -1,0 +1,45 @@
+[services.app]
+build.builder = "DOCKERFILE"
+build.dockerfilePath = "Dockerfile"
+deploy.startCommand = "python run.py"
+deploy.healthcheckPath = "/health"
+deploy.healthcheckTimeout = 300
+deploy.restartPolicyType = "ON_FAILURE"
+deploy.restartPolicyMaxRetries = 10
+deploy.numReplicas = 1
+
+[services.celery-worker]
+build.builder = "DOCKERFILE"
+build.dockerfilePath = "celery-worker.Dockerfile"
+deploy.startCommand = "celery -A celery_worker.celery_app worker --loglevel=info"
+deploy.restartPolicyType = "ON_FAILURE"
+deploy.restartPolicyMaxRetries = 10
+deploy.numReplicas = 1
+
+[services.celery-flower]
+build.builder = "DOCKERFILE"
+build.dockerfilePath = "celery-flower.Dockerfile"
+deploy.startCommand = "celery -A celery_worker.celery_app flower --port=5555"
+deploy.restartPolicyType = "ON_FAILURE"
+deploy.restartPolicyMaxRetries = 10
+deploy.numReplicas = 1
+
+[environments.production]
+MONGODB_URL = "mongodb://mongodb:27017"
+DATABASE_NAME = "fastapi_celery_demo"
+REDIS_URL = "redis://redis:6379/0"
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+APP_HOST = "0.0.0.0"
+APP_PORT = "8000"
+DEBUG = "false"
+
+[environments.development]
+MONGODB_URL = "mongodb://mongodb:27017"
+DATABASE_NAME = "fastapi_celery_demo_dev"
+REDIS_URL = "redis://redis:6379/0"
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+APP_HOST = "0.0.0.0"
+APP_PORT = "8000"
+DEBUG = "true" 
